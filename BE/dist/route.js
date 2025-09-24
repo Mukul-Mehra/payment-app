@@ -1,11 +1,15 @@
 import { Router } from "express";
-import { UserModel } from "./db.js";
+import { AccountModel, UserModel } from "./db.js";
 export const router = Router();
 import { z } from "zod";
 import jwt from "jsonwebtoken";
 import { JWT_SECRET } from './config.js';
 import { authMiddleware } from "./middleware.js";
+import mongoose from "mongoose";
 router.get("/", function (req, res) {
+    res.send({
+        message: "hello"
+    });
 });
 router.post("/signup", async function (req, res) {
     const requireBody = z.object({
@@ -40,6 +44,11 @@ router.post("/signup", async function (req, res) {
         email: email
     });
     const userId = user._id;
+    //creating User Accout
+    await AccountModel.create({
+        userId,
+        balance: 1 + Math.random() * 10000
+    });
     const token = jwt.sign({
         userId
     }, JWT_SECRET);
@@ -83,5 +92,27 @@ router.put("/user", authMiddleware, async (req, res) => {
     catch (err) {
         res.status(500).json({ message: "Error updating user" });
     }
+});
+router.get("/bulk", async (req, res) => {
+    const filter = req.query.filter || "";
+    const users = await UserModel.find({
+        $or: [{
+                firstName: {
+                    "$regex": filter
+                }
+            }, {
+                lastName: {
+                    "$regex": filter
+                }
+            }]
+    });
+    res.json({
+        user: users.map(user => ({
+            email: user.email,
+            firstName: user.firstName,
+            lastName: user.lastName,
+            _id: user._id
+        }))
+    });
 });
 //# sourceMappingURL=route.js.map

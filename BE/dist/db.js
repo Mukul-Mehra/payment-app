@@ -10,5 +10,18 @@ const User = new Schema({
         unique: true
     }
 });
+const Account = new Schema({
+    //@ts-ignore
+    userId: {
+        type: Schema.Types.ObjectId,
+        ref: "User",
+        required: true
+    },
+    balance: {
+        type: Number,
+        required: true
+    }
+});
 export const UserModel = mongoose.model("User", User);
+export const AccountModel = mongoose.model("Account", Account);
 //# sourceMappingURL=db.js.map
