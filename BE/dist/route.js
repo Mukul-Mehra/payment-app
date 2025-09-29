@@ -16,7 +16,7 @@ router.post("/signup", async function (req, res) {
         firstname: z.string().min(3).max(50),
         lastname: z.string().min(3).max(50),
         password: z.string().min(3).max(50),
-        email: z.string().min(5).max(50).email()
+        email: z.string().min(5).max(50)
     });
     const parsedData = requireBody.safeParse(req.body);
     if (!parsedData.success) {
@@ -93,7 +93,7 @@ router.put("/user", authMiddleware, async (req, res) => {
         res.status(500).json({ message: "Error updating user" });
     }
 });
-router.get("/bulk", async (req, res) => {
+router.get("/users/bulk", async (req, res) => {
     const filter = req.query.filter || "";
     const users = await UserModel.find({
         $or: [{
