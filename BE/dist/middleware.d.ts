@@ -6,6 +6,9 @@ declare global {
         }
     }
 }
-declare const authMiddleware: (req: Request, res: Response, next: NextFunction) => Response<any, Record<string, any>> | undefined;
+interface AuthenticatedRequest extends Request {
+    userId?: string;
+}
+declare const authMiddleware: (req: AuthenticatedRequest, res: Response, next: NextFunction) => Response<any, Record<string, any>> | undefined;
 export { authMiddleware };
 //# sourceMappingURL=middleware.d.ts.map

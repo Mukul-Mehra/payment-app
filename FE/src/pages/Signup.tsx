@@ -1,11 +1,18 @@
 import { InputBox } from '../components/InputBox';
 import { Button } from '../components/Button';
 import { useState } from 'react';
-import { useNavigate } from 'react-router-dom'; 
+import { Navigate, useNavigate } from 'react-router-dom';
 import axios from 'axios';
+import { BottomWarning } from '../components/BottomWarning';
 
 
 export function Signup() {
+    const token = localStorage.getItem("token");
+
+    if (token) {
+        // already logged in → redirect to dashboard
+        return <Navigate to="/dashboard" replace />;
+    }
     const navigate = useNavigate()
     const [firstname, setFirstName] = useState<String>("")
     const [lastname, setLastName] = useState<String>("")
@@ -24,40 +31,40 @@ export function Signup() {
                 <InputBox onChange={(e) => {
                     setFirstName(e.target.value)
                 }} label='First Name' placeholder='John' />
-                <InputBox onChange={e =>{
+                <InputBox onChange={e => {
                     setLastName(e.target.value)
                 }} label='Last Name' placeholder='Cena' />
-                <InputBox onChange={e =>{
+                <InputBox onChange={e => {
                     setEmail(e.target.value)
                 }} label='Email' placeholder='JohnCena@gmail.com' />
-                <InputBox onChange={e =>{
+                <InputBox onChange={e => {
                     setPassword(e.target.value)
                 }} type='password' label='Password' placeholder='********' />
             </div>
 
             <div className="mt-7">
-                 <Button 
-                        onClick={async () => {
-                            try {
-                                const response = await axios.post("http://localhost:3000/api/v1/signup", {
-                                    firstname,
-                                    lastname,
-                                    password,
-                                    email
-                                });
+                <Button
+                    onClick={async () => {
+                        try {
+                            const response = await axios.post("http://localhost:3000/api/v1/signup", {
+                                firstname,
+                                lastname,
+                                password,
+                                email
+                            });
 
-                                localStorage.setItem("token", response.data.token);
+                            localStorage.setItem("token", response.data.token);
 
-                                // ✅ redirect to dashboard
-                                navigate("/dashboard");  
-                            } catch (err) {
-                                console.error("Signup failed:", err);
-                            }
-                        }} 
-                        label='Sign Up' 
-                    />
+                            // ✅ redirect to dashboard
+                            navigate("/dashboard");
+                        } catch (err) {
+                            console.error("Signup failed:", err);
+                        }
+                    }}
+                    label='Sign Up'
+                />
             </div>
-            {/* <BottomWarning label='Already Have an Account' buttonText='Sign In' to='/signup' /> */}
+            <BottomWarning label='Already Have an Account' buttonText='Sign In' to='/signin' />
 
 
         </div>

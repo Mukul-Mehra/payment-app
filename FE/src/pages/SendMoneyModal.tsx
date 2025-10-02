@@ -1,37 +1,50 @@
+import axios from "axios";
 import { useState } from "react";
 import { useSearchParams } from "react-router-dom";
-type SendMoneyModalProps = {
-  user: { _id: string; firstName: string; lastName: string };
+import { toast } from "react-toastify";
+
+interface SendMoneyModalProps {
+  user: { _id: string; firstName: string; lastName: string; email: string };
   onClose: () => void;
-};
+}
 
-
-export default function SendMoneyModal({user,onClose}  : SendMoneyModalProps) {
+export default function SendMoneyModal({ user, onClose }: SendMoneyModalProps) {
   const [searchParams] = useSearchParams();
   const firstName = searchParams.get("firstName") || "User";
   const lastName = searchParams.get("lastName") || "";
+  const userId = searchParams.get("id") || "";
 
   const [amount, setAmount] = useState("");
-  
 
-  const handleSend = (e: React.FormEvent) => {
+  const handleTransfer = async (e: React.FormEvent) => {
     e.preventDefault();
-    alert(`₹${amount} sent to ${firstName} ${lastName}`);
-    setAmount("");
-    onClose();
+    try {
+      await axios.post(
+        "http://localhost:3000/api/v1/account/transfer",
+        { amount, to: userId },
+        {
+          headers: {
+            Authorization: localStorage.getItem("token") || "",
+          },
+        }
+      );
+
+      toast.success("✅ Money Transferred Successfully!");
+
+      // close modal after 2s
+      setTimeout(() => onClose(), 2000);
+    } catch (error) {
+      toast.error("❌ Transfer failed!");
+    }
   };
 
   return (
     <div className="fixed inset-0 flex items-center justify-center bg-black/70 z-50">
       {/* Overlay (click to close) */}
-      <div
-        className="absolute inset-0"
-        onClick={onClose}
-      />
+      <div className="absolute inset-0" onClick={onClose} />
 
       <form
-        onSubmit={handleSend}
-        onClick={(e) => e.stopPropagation()} // prevent overlay close
+        onSubmit={handleTransfer}
         className="relative bg-neutral-900 text-white rounded-xl shadow-xl p-6 w-full max-w-sm space-y-4"
       >
         <h2 className="text-xl font-bold text-center">Send Money</h2>
@@ -46,7 +59,9 @@ export default function SendMoneyModal({user,onClose}  : SendMoneyModalProps) {
         </div>
 
         <div>
-          <label className="block text-sm text-gray-300 mb-1">Amount (₹)</label>
+          <label className="block text-sm text-gray-300 mb-1">
+            Amount (₹)
+          </label>
           <input
             type="number"
             value={amount}
